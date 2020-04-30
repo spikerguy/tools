@@ -54,7 +54,7 @@ lint: lint-steps lint-composite
 
 TOOLSDIR?=	/usr/tools
 TOOLSBRANCH?=	master
-SETTINGS?=	19.7
+SETTINGS?=	20.1
 
 CONFIG?=	${TOOLSDIR}/config/${SETTINGS}/build.conf
 
@@ -85,20 +85,19 @@ UPLOADDIR?=	.
 _VERSION!=	date '+%Y%m%d%H%M'
 VERSION?=	${_VERSION}
 STAGEDIRPREFIX?=/usr/obj
-# XXX GITBASE modifier
-PORTSREFBASE?=	https://github.com/hardenedbsd
+
+PORTSREFURL?=	https://git-01.md.hardenedbsd.org/HardenedBSD/hardenedbsd-ports.git
 PORTSREFDIR?=	/usr/hardenedbsd-ports
 PORTSREFBRANCH?=master
-PLUGINSENV?=	PLUGIN_PHP=${PHP} PLUGIN_ABI=${SETTINGS} \
-		PLUGIN_PYTHON=${PYTHON3}
+
+PLUGINSENV?=	PLUGIN_PHP=${PHP} PLUGIN_ABI=${SETTINGS} PLUGIN_PYTHON=${PYTHON}
 PLUGINSDIR?=	/usr/plugins
 PLUGINSBRANCH?=	master
 PORTSDIR?=	/usr/ports
 PORTSBRANCH?=	master
 COREDIR?=	/usr/core
 COREBRANCH?=	master
-COREENV?=	CORE_PHP=${PHP} CORE_ABI=${SETTINGS} \
-		CORE_PYTHON2=${PYTHON2} CORE_PYTHON=${PYTHON3}
+COREENV?=	CORE_PHP=${PHP} CORE_ABI=${SETTINGS} CORE_PYTHON=${PYTHON}
 SRCDIR?=	/usr/src
 SRCBRANCH?=	master
 
@@ -132,7 +131,7 @@ VERBOSE_FLAGS=	-x
 VERBOSE_HIDDEN=	@
 .endif
 
-.for _VERSION in PERL PHP PYTHON2 PYTHON3 RUBY
+.for _VERSION in PERL PHP PYTHON RUBY
 VERSIONS+=	PRODUCT_${_VERSION}=${${_VERSION}}
 .endfor
 
@@ -153,7 +152,7 @@ ${STEP}: lint-steps
 	    -H "${COREENV}" -u "${UEFI:tl}" -U "${SUFFIX}" \
 	    -V "${ADDITIONS}" -O "${GITBASE}"  -r "${SERVER}" \
 	    -q "${VERSIONS}" -h "${PLUGINSENV}" -I "${UPLOADDIR}" \
-	    -D "${DEVELBRANCH}" ${${STEP}_ARGS}
+	    -D "${DEVELBRANCH}" -A "${PORTSREFURL}" ${${STEP}_ARGS}
 .endfor
 
 .for SCRIPT in ${SCRIPTS}

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2014-2019 Franco Fichtner <franco@opnsense.org>
+# Copyright (c) 2014-2020 Franco Fichtner <franco@opnsense.org>
 # Copyright (c) 2010-2011 Scott Ullrich <sullrich@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,10 +28,13 @@
 
 set -e
 
-OPTS="a:B:b:C:c:D:d:E:e:F:f:G:g:H:h:I:K:k:L:l:m:n:O:o:P:p:q:R:r:S:s:T:t:U:u:v:V:"
+OPTS="A:a:B:b:C:c:D:d:E:e:F:f:G:g:H:h:I:K:k:L:l:m:n:O:o:P:p:q:R:r:S:s:T:t:U:u:v:V:"
 
 while getopts ${OPTS} OPT; do
 	case ${OPT} in
+	A)
+		export PORTSREFURL=${OPTARG}
+		;;
 	a)
 		export PRODUCT_TARGET=${OPTARG%%:*}
 		export PRODUCT_ARCH=${OPTARG##*:}
@@ -189,8 +192,7 @@ PRODUCT_SPEED
 PRODUCT_SERVER
 PRODUCT_PHP
 PRODUCT_PERL
-PRODUCT_PYTHON2
-PRODUCT_PYTHON3
+PRODUCT_PYTHON
 PRODUCT_RUBY
 PRODUCT_KERNEL
 PRODUCT_GITBASE
@@ -316,7 +318,13 @@ git_clone()
 
 	echo ">>> Cloning ${1}:"
 
-	git clone "${PRODUCT_GITBASE}/$(basename ${1})" ${1}
+	URL=${2}
+
+	if [ -z "${URL}" ]; then
+		URL=${PRODUCT_GITBASE}/$(basename ${1})
+	fi
+
+	git clone "${URL}" ${1}
 }
 
 git_pull()
@@ -557,7 +565,7 @@ setup_version()
 
 setup_base()
 {
-	echo ">>> Setting up world in ${1}"
+	echo ">>> Setting up base in ${1}"
 
 	tar -C ${1} -xpf ${SETSDIR}/base-*-${PRODUCT_ARCH}${PRODUCT_DEVICE+"-${PRODUCT_DEVICE}"}.txz
 
@@ -688,7 +696,12 @@ extract_packages()
 	PACKAGESET=$(find ${SETSDIR} -name "packages-*-${PRODUCT_FLAVOUR}-${PRODUCT_ARCH}.tar")
 	if [ -f "${PACKAGESET}" ]; then
 		tar -C ${BASEDIR}${PACKAGESDIR} -xpf ${PACKAGESET}
+		return 0
 	fi
+
+	echo ">>> Extract failed: no packages set found";
+
+	return 1
 }
 
 search_packages()
