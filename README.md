@@ -18,6 +18,16 @@ grab the repositories (overwriting standard ports and src):
     # git clone https://github.com/opnsense/tools
     # cd tools
     # make update
+    
+    
+Setting up a build system for Arm devices
+=========================
+
+    pkg install aarch64bin-utils  qemu-user-static
+
+For RPI3 Uboot
+=========================
+    pkg install u-boot-rpi3
 
 TL;DR
 =====
