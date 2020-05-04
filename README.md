@@ -18,6 +18,11 @@ grab the repositories (overwriting standard ports and src):
     # git clone https://github.com/nekoprog/tools
     # cd tools
     # make update
+    
+Setting up a build system for Aarch64 devices
+=========================
+
+    pkg install aarch64-binutils
 
 TL;DR
 =====
