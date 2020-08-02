@@ -265,6 +265,7 @@ export PRODUCT_PLUGIN="os-*${PRODUCT_SUFFIX}"
 
 # get the current version for the selected source repository
 eval export SRC$(grep ^REVISION= ${SRCDIR}/sys/conf/newvers.sh)
+export SRCABI="FreeBSD:${SRCREVISION%%.*}:${PRODUCT_ARCH}"
 
 case "${SELF}" in
 confirm|fingerprint|info|print)
@@ -278,8 +279,10 @@ confirm|fingerprint|info|print)
 	;;
 esac
 
+PKGBIN=$(which pkg || true)
+
 for WANT in git ${PRODUCT_WANTS}; do
-	if ! pkg info ${WANT} > /dev/null; then
+	if ! ${PKGBIN} info ${WANT} > /dev/null; then
 		echo ">>> Required build package '${WANT}' is not installed." >&2
 		exit 1
 	fi
@@ -299,7 +302,7 @@ git_fetch()
 {
 	echo ">>> Fetching ${1}:"
 
-	git -C ${1} fetch --all --prune
+	git -C ${1} fetch --tags --prune origin
 }
 
 git_clone()
@@ -618,10 +621,12 @@ setup_entropy()
 setup_set()
 {
 	tar -C ${1} -xJpf ${2}
+	rm -f {1}/.abi_hint
 }
 
 generate_set()
 {
+	echo ${SRCABI} > ${1}/.abi_hint
 	tar -C ${1} -cvf - . | xz > ${2}
 }
 
@@ -921,6 +926,8 @@ bundle_packages()
 
 	# generate index files
 	pkg repo ${BASEDIR}${PACKAGESDIR}-new/ ${SIGNARGS}
+
+	echo ${SRCABI} > ${BASEDIR}${PACKAGESDIR}-new/.abi_hint
 
 	sh ./clean.sh packages
 
